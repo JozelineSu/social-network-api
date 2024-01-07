@@ -1,126 +1,107 @@
-const { Thought, User } = require('../models');
+const User = require('../models/User');
 
-mdouel.exports = {
-    // Get all thoughts
-    async getThougths(req, res) {
+module.exports = {
+    // Get all users
+    async getUsers(req, res) {
         try {
-            const thought = await Thought.find();
-            res.json(thought);
+            const users = await User.find();
+            res.json(users);
         } catch (err) {
-            res.status(500).json(err);
+            res.status(505).json(err);
         }
     },
-    // Get single thought by _id
-    async getSingleThought(req, res) {
+    // Get a single user
+    async getSingleUser(req, res) {
         try {
-            const thought = await Thought.findOne({ _id: req.params.thoughtId });
-
-            if (!thought) {
-                return res.status(404).json({ message: 'No thought found with that id'});
-            }
-
-            res.json(comment);
-        } catch (err) {
-            res.status(500).json(err);
-        }
-    },
-    // Create a thought
-    async createThought(req, res) {
-        try {
-            const thought = await Thought.create(req.body);
-            const user = await User.findOneAndUpdate(
-                { _id: req.body.userId},
-                {$addToSet: { thoughts: thought._id }},
-                { new: true }
-            )
-
+            const user = await User.findOne({ _id: req.params.userId })
+                .populate('friends')
+                .populate('thoughts');
+            
             if (!user) {
-                return res.status(404).json({ message: 'Thought created, but found no user with that ID'});
+                return res.status(404).json({ message: 'No user with this id' })
             }
 
-            res.json('Created thought');
+            res.json(user);
         } catch (err) {
-            console.log(err);
             res.status(500).json(err);
         }
     },
-    // Update thought
-    async updateThought(req, res) {
+    // Create user
+    async createUser(req, res) {
         try {
-            const thought = await Thought.findOneAndUpdate(
-                { _id: req.params.thoughtId },
+            const dbUserData = await User.create(req.body);
+            res.json(dbUserData);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
+    // Update user
+    async updateUser(req, res) {
+        try {
+            const user = await User.findOneAndUpdate(
+                { _id: req.params.userId },
                 { $set: req.body },
                 { runValidators: true, new: true }
             );
 
-            if (!thought) {
-                return res.status(404).json({ message: 'No thought found with this id' });
+            if(!user) {
+                return res.stauts(404).json({ message: 'No user with this id' });
             }
 
-            res.json(thought);
+            res.json(user);
         } catch (err) {
             console.log(err);
             res.status(500).json(err);
         }
     },
-    // Delete thought
-    async deleteThought(req, res) {
+    // Delete user
+    async deleteUser(req, res) {
         try {
-            const thought = await Thought.findOneAndRemove({ _id: req.params.thoughtId });
+            const user = await User.findOneAndRemove({ _id: req.params.userId });
 
-            if (!thought) {
-                return res.status(404).json({ message: 'No thought with this id'});
+            if (!user) {
+                return res.status(404).json({ message: 'No user with this id'});
             }
 
-            const user = await User.findOneAndUpdate(
-                { thoughts: req.params.thoughtId },
-                { $pull: { videos: req.params.thoughtId }},
-                { new: true }
+            res.json({ message: 'User successfully deleted' });
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
+    // Add friend
+    async addFriend(req, res) {
+        try {
+            const user = await User.findOneandUpdate(
+                { _id: req.params.userId},
+                { $addToSet: { friends: req.body } },
+                { runValidators: true, new: true }
             );
 
             if (!user) {
-                return res.status(404).json({ message: 'Thought created but no user found with this id'});
+                return res.status(404).json({ message: 'No user witht that id' });
             }
 
-            res.json({ message: 'Thought successfully deleted' });
+            res.json(user);
         } catch (err) {
             res.status(500).json(err);
         }
     },
-    // Add thought reaction
-    async addThoughtReaction(req, res) {
+    // Delete friend
+    async deleteFriend(req, res) {
         try {
-            const thought = await Thought.findOneAndUpdate(
-                { _id: req.params.thoughtId },
-                { $addToSet: { reactions: req.body }},
-                { runValidators: true, new: true }
-            );
-
-            if (!thought) {
-                return res.status(404).json({ message: 'No thought with this id' });
-            }
-
-            res.json(thought);
-        } catch (err) {
-            res.status(500).json(err);
-        }
-    },
-    // Remove thought reaction
-    async removeThoughtReaction(req, res) {
-        try {
-            const thought = await Thought.findOneAndUpdate(
-                { _id: req.params.thoughtId },
-                { $pull: { reactions: { reactionId: req.params.reactionId } } },
+            const user = await user.findOneAndUpdate(
+                { _id: req.params.userId },
+                { $pull: { friends: { friendId: req.params.friendId } } },
                 { runValidators: true, new: true }
             )
 
-            if (!video) {
-                return resstatus(404).json({ message: 'No video with this id' });
+            if (!user) {
+                return res.status(404).json({ message: 'No user with this id' });
             }
 
-            res.json(thought);
+            res.json(user);
         } catch(err) {
             res.status(500).json(err);
         }
-    },
-};
+    }
+}
