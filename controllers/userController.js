@@ -71,14 +71,14 @@ module.exports = {
     // Add friend
     async addFriend(req, res) {
         try {
-            const user = await User.findOneandUpdate(
-                { _id: req.params.userId},
-                { $addToSet: { friends: req.body } },
+            const user = await User.findOneAndUpdate(
+                { _id: req.params.userId },
+                { $addToSet: { friends: req.params.friendId } },
                 { runValidators: true, new: true }
             );
 
             if (!user) {
-                return res.status(404).json({ message: 'No user witht that id' });
+                return res.status(404).json({ message: 'No user with that id' });
             }
 
             res.json(user);
@@ -89,7 +89,7 @@ module.exports = {
     // Delete friend
     async deleteFriend(req, res) {
         try {
-            const user = await user.findOneAndUpdate(
+            const user = await User.findOneAndUpdate(
                 { _id: req.params.userId },
                 { $pull: { friends: { friendId: req.params.friendId } } },
                 { runValidators: true, new: true }

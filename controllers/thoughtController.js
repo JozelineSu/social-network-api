@@ -1,8 +1,8 @@
 const { Thought, User } = require('../models');
 
-mdouel.exports = {
+module.exports = {
     // Get all thoughts
-    async getThougths(req, res) {
+    async getThoughts(req, res) {
         try {
             const thought = await Thought.find();
             res.json(thought);
@@ -19,7 +19,7 @@ mdouel.exports = {
                 return res.status(404).json({ message: 'No thought found with that id'});
             }
 
-            res.json(comment);
+            res.json(thought);
         } catch (err) {
             res.status(500).json(err);
         }
